@@ -28,7 +28,8 @@
 
 ※ 学習済みモデルの公開はおこなっていません
 
-研究で作成したコードの公開版 
+研究で作成したコードの公開版　　
+
 [Android アプリ側のリポジトリ](https://github.com/KensukeNakazawa/PearAppearanceEvaluateSystemAndroidP)
 
 ## 環境構築
