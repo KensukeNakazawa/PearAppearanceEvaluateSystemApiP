@@ -1,0 +1,14 @@
+numpy==1.19.*
+pandas==1.1.*
+opencv-python==4.4.*
+tensorflow==2.5.*
+scikit-image==0.17.*
+python-dotenv==0.18.*
+scikit-learn==0.23.*
+xgboost==1.3.*
+mysqlclient==2.0.3
+celery
+redis
+Flask
+boto3
+uwsgi

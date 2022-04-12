@@ -1,0 +1,109 @@
+version: '3'
+volumes:
+  db-store:
+  pip-store:
+  minio:
+services:
+  pear:
+    build: ./docker/python
+    container_name: pear_evaluate_container
+    tty: true
+    links:
+      - database
+      - redis
+      - minio
+    ports:
+      - 8000:3031
+    volumes:
+      - ./:/var/www
+      - pip-store:/root/opt
+
+  celery:
+    build: ./docker/python
+    container_name: pear_celery_container
+    tty: true
+    links:
+      - database
+      - redis
+    volumes:
+      - ./:/var/www
+      - pip-store:/root/opt
+    command: celery -A src.pear_domain.job.evaluate_job:job worker --loglevel=info
+    depends_on:
+      - pear
+      - redis
+  nginx:
+    build: ./docker/nginx
+    container_name: pear_nginx_container
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
+      # nginxのログをホストOSの /tmp/nginx_log に出力する
+      - ./docker/nginx/tmp/nginx_log:/var/log/nginx
+    links:
+      - pear
+    ports:
+      - 8001:80
+    environment:
+      TZ: "Asia/Tokyo"
+  database:
+    build:
+      context: .
+      dockerfile: ./docker/mysql/Dockerfile
+    container_name: pear_db_container
+    volumes:
+      - db-store:/var/lib/mysql
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      - MYSQL_DATABASE=pear_system
+      - MYSQL_USER=pear_system
+      - MYSQL_PASSWORD=root
+      - MYSQL_ROOT_PASSWORD=root
+    ports:
+      - 3306:3306
+  redis:
+    #https://tech.pjin.jp/blog/2018/02/27/docker%E3%81%A7php%E3%82%A8%E3%83%A9%E3%83%BC%E3%80%8Cphp_network_getaddresses-getaddrinfo-failed-name-or-service-not-known%E3%80%8D/
+    image: redis:6.2.2
+    container_name: pear_cache_container
+    ports:
+      - "6379:6379"
+    command: redis-server
+  minio:
+    image: minio/minio:latest
+    container_name: pear_minio_container
+    ports:
+      - 9000:9000
+      - 9001:9001
+    environment:
+      - MINIO_ROOT_USER=minio
+      - MINIO_ROOT_PASSWORD=minio123
+      - MINIO_ACCESS_KEY=minio
+      - MINIO_SECRET_KEY=minio123
+    entrypoint: sh
+    command: -c "
+      mkdir -p /data/.minio.sys/buckets;
+      cp -r /policies/* /data/.minio.sys/;
+      cp -r /export/* /data/;
+      /opt/bin/minio server --console-address ":9001" /data;
+      "
+    volumes:
+      - minio:/data
+      - ./docker/minio/export:/export
+      - ./docker/minio/policies:/policies
+  swagger-ui:
+    image: swaggerapi/swagger-ui
+    container_name: pear_swagger_ui_container
+    ports:
+      - 8002:8080
+    volumes:
+      - ./docker/swagger/openapi.yml:/openapi.yml
+    environment:
+      SWAGGER_JSON: /openapi.yml
+
+  swagger-api:
+    image: stoplight/prism:3
+    container_name: pear_swagger_api_container
+    ports:
+      - 8003:4010
+    command: mock -h 0.0.0.0 /openapi.yml
+    volumes:
+      - ./docker/swagger/openapi.yml:/openapi.yml

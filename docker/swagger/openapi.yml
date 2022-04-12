@@ -1,0 +1,139 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: Sample API
+  description: >-
+    A sample API that uses a sample-site as an example to demonstrate features in
+    the OpenAPI 3.0 specification
+servers:
+  - url: 'http://localhost:8003'
+paths:
+  /pear/evaluates:
+    get:
+      description: >
+        Return all evaluated pears
+      operationId: GetAllPear
+      responses:
+        '200':
+          description: get all pears
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetAllPear'
+    post:
+      description: >
+        Returns all users
+      operationId: findUsers
+      consumes:
+        - multipart/form-data
+      parameters:
+        - name: pear_images
+          in: formData
+          description: tags to filter by
+          required: false
+          style: form
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        '200':
+          description: user response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PearPost'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /pear/evaluates/{pear_id}:
+    get:
+      description: >
+        Return Target Pear Image
+      operationId: GetEvaluatePear
+      responses:
+        '200':
+          description: evaluate pear
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EvaluatedPear'
+components:
+  schemas:
+    PearPost:
+      type: "object"
+      required:
+        - "name"
+      properties:
+        message:
+          type: "string"
+          example: "OK"
+        pear_id:
+          type: "int"
+          example: "1"
+    EvaluatedPear:
+      type: 'object'
+      properties:
+        message:
+          type: 'string'
+          example: 'OK'
+        evaluate_code:
+          type: 'string'
+          example: 'DN'
+        pear_images:
+          type: 'array'
+          example:
+            - 'file_url_1'
+            - 'file_url_2'
+            - 'file_url_3'
+        evaluated_images:
+          type: 'array'
+          example:
+            - 'file_url_1'
+            - 'file_url_2'
+            - 'file_url_3'
+        deteriorations:
+          type: 'array'
+          example: 
+           - {'name': '黒斑病', 'ratio': '20.5'}
+           - {'name': '外傷痕', 'ratio': '5.5'}
+           - {'name': '斑点状汚損', 'ratio': '10.5'}
+           - {'name': '面状汚損', 'ratio': '13.5'}
+           - {'name': '薬斑', 'ratio': '2.5'}
+    GetAllPear:
+      type: 'object'
+      properties:
+        message:
+          type: 'string'
+          example: 'OK'
+        pears:
+          type: 'array'
+          example:
+            - $ref: '#/components/schemas/Pear'
+            - $ref: '#/components/schemas/Pear'
+            - $ref: '#/components/schemas/Pear'
+            - $ref: '#/components/schemas/Pear'
+            - $ref: '#/components/schemas/Pear'
+            - $ref: '#/components/schemas/Pear'
+            - $ref: '#/components/schemas/Pear'
+    Pear:
+      pear_id: 1
+      start_at: '2021-10-01 10:20'
+    Error:
+      type: "object"
+      properties:
+        code:
+          type: "integer"
+          format: "int32"
+        type:
+          type: "string"
+        message:
+          type: "string"
+externalDocs:
+  description: "Find out more about Swagger"
+  url: "http://swagger.io"
