@@ -24,7 +24,11 @@
 
 洋ナシの等級を判定するために、外観汚損の検査を行うためのAPI
 
-※ 研究で作成したコードの公開版
+※ 研究で作成したコードの公開版　　
+
+※ 学習済みモデルの公開はおこなっていません
+
+研究で作成したコードの公開版 
 [Android アプリ側のリポジトリ](https://github.com/KensukeNakazawa/PearAppearanceEvaluateSystemAndroidP)
 
 ## 環境構築
